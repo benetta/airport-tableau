@@ -1,28 +1,55 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
+import { Container, Row, Col } from 'reactstrap';
+import { connect } from 'react-redux';
+import { getData } from './actions';
+
+import Controls from './components/Controls';
+import FlightsTable from './components/FlightsTable';
+
 import './App.css';
 
 class App extends Component {
+  componentDidMount() {
+    this.props.getData();
+  }
+
   render() {
-    return (
-      <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.js</code> and save to reload.
-          </p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-        </header>
-      </div>
-    );
+    const { flights, isLoading, hasErrored, status } = this.props;
+    let flightsRender; 
+
+    if(isLoading) {
+      flightsRender = <Col>Загружаем...</Col>;
+    } else if (hasErrored) {
+      const errMessage = status === 'search' ? 'К сожалению, мы не можем найти заданный рейс.' : 'Произошла ошибка при запросе рейсов.'
+      flightsRender = <Col>{errMessage}</Col>
+    } else if (flights) {
+      flightsRender = <FlightsTable flights={flights.FlightInformation.Flights.Flight}></FlightsTable>;
+    }
+
+      return (
+        <Container>
+          <Controls></Controls>
+          <Row>
+            {flightsRender}
+          </Row>
+        </Container>  
+      );
   }
 }
 
-export default App;
+const mapStateToProps = (state) => {
+  return {
+    flights: state.flights,
+    hasErrored: state.dataHasErrored,
+    isLoading: state.dataIsLoading,
+    status: state.status
+  };
+};
+
+const mapDispatchToProps = (dispatch) => {
+  return {
+    getData: () => dispatch(getData())
+  };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(App);
