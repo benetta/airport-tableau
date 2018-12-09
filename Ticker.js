@@ -18,4 +18,4 @@ setInterval(ticker.tick.bind(ticker), 1000);
 
 // или стрелочные функции
 
-etInterval(() => ticker.tick(), 1000);
+setInterval(() => ticker.tick(), 1000);
